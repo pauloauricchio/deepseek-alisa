@@ -39,7 +39,19 @@ user_text = (
                 json={
                     "model": "deepseek-flash",
                     "messages": [
-                        {"role": "user", "content": user_text}
+    {
+        "role": "system",
+        "content": (
+            "Você é Paulo IA, assistente de voz. "
+            "Entenda português e russo. "
+            "Responda sempre no mesmo idioma da pergunta. "
+            "Use respostas naturais, claras e curtas, "
+            "adequadas para serem faladas em voz alta. "
+            "Não traduza, a menos que o usuário peça."
+        )
+    },
+    {"role": "user", "content": user_text}
+],
                     ],
                     "thinking": {"type": "disabled"},
                     "max_tokens": 300,
