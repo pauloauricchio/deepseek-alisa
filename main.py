@@ -1,4 +1,4 @@
-
+```python
 import os
 import logging
 import requests
@@ -17,11 +17,12 @@ async def main(request: Request):
     version = body.get("version", "1.0")
     session = body.get("session", {})
     request_data = body.get("request", {})
-user_text = (
-    request_data.get("original_utterance")
-    or request_data.get("command")
-    or ""
-)
+
+    user_text = (
+        request_data.get("original_utterance")
+        or request_data.get("command")
+        or ""
+    )
 
     if not user_text:
         answer = "Desculpe, não entendi a pergunta."
@@ -39,25 +40,24 @@ user_text = (
                 json={
                     "model": "deepseek-flash",
                     "messages": [
-    {
-        "role": "system",
-        "content": (
-            "Você é Paulo IA, assistente de voz. "
-            "Entenda português e russo. "
-            "Responda sempre no mesmo idioma da pergunta. "
-            "Use respostas naturais, claras e curtas, "
-            "adequadas para serem faladas em voz alta. "
-            "Não traduza, a menos que o usuário peça."
-        )
-    },
-    {"role": "user", "content": user_text}
-],
+                        {
+                            "role": "system",
+                            "content": (
+                                "Você é Paulo IA, um assistente de voz. "
+                                "Entenda português e russo. "
+                                "Responda sempre no mesmo idioma da pergunta. "
+                                "Use respostas naturais, claras e curtas, "
+                                "adequadas para serem faladas em voz alta. "
+                                "Não traduza, a menos que o usuário peça."
+                            )
+                        },
+                        {"role": "user", "content": user_text}
                     ],
                     "thinking": {"type": "disabled"},
                     "max_tokens": 300,
                     "stream": False
                 },
-                timeout=(3, 8)
+                timeout=(3, 20)
             )
 
             if response.status_code != 200:
@@ -66,7 +66,10 @@ user_text = (
                     response.status_code,
                     response.text[:500]
                 )
-                answer = "Desculpe, a inteligência artificial está temporariamente indisponível."
+                answer = (
+                    "Desculpe, a inteligência artificial "
+                    "está temporariamente indisponível."
+                )
             else:
                 data = response.json()
                 choices = data.get("choices", [])
@@ -74,13 +77,19 @@ user_text = (
                     choices[0].get("message", {}).get("content", "")
                     if choices else ""
                 )
-                if not answer:
-                    logger.error("Resposta sem conteúdo esperado: %s", str(data)[:500])
+
+                if not isinstance(answer, str) or not answer.strip():
+                    logger.error(
+                        "Resposta sem conteúdo esperado: %s",
+                        str(data)[:500]
+                    )
                     answer = "Desculpe, não recebi uma resposta válida."
 
         except requests.RequestException as exc:
             logger.error("Erro de conexão com o DeepSeek: %s", str(exc))
-            answer = "Desculpe, não consegui conectar à inteligência artificial."
+            answer = (
+                "Desculpe, não consegui conectar à inteligência artificial."
+            )
         except (ValueError, TypeError, IndexError, KeyError) as exc:
             logger.error("Erro ao interpretar resposta: %s", str(exc))
             answer = "Desculpe, ocorreu um erro ao processar a resposta."
@@ -93,3 +102,4 @@ user_text = (
             "text": answer
         }
     }
+```
