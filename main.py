@@ -16,7 +16,12 @@ async def main(request: Request):
     body = await request.json()
     version = body.get("version", "1.0")
     session = body.get("session", {})
-    user_text = body.get("request", {}).get("original_utterance", "")
+    request_data = body.get("request", {})
+user_text = (
+    request_data.get("original_utterance")
+    or request_data.get("command")
+    or ""
+)
 
     if not user_text:
         answer = "Desculpe, não entendi a pergunta."
@@ -36,7 +41,8 @@ async def main(request: Request):
                     "messages": [
                         {"role": "user", "content": user_text}
                     ],
-                    "max_tokens": 200,
+                    "thinking": {"type": "disabled"},
+                    "max_tokens": 300,
                     "stream": False
                 },
                 timeout=(3, 8)
